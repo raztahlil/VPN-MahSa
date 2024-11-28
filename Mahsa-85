@@ -1,60 +1,88 @@
-//profile-title: base64:SDIgT04gU0lOR0JPWA==
-//profile-update-interval: 9
-//subscription-userinfo: upload=64424500944; download=45097156608; total=1073741824000; expire=1762646400
-//support-url:  https://t.me/F_NiREvil
-//profile-web-page-url: https://github.com/NiREvil
-
 {
+  "log": {
+    "disabled": true,
+    "level": "panic"
+  },
   "dns": {
     "servers": [
       {
-        "tag": "dns-remote",
-        "address": "https://2tnc6zpc9c.cloudflare-gateway.com/dns-query",
-        "address_resolver": "dns-direct"
+        "tag": "Internet-dns",
+        "address": "tcp://1.1.1.2",
+        "strategy": "prefer_ipv4",
+        "detour": "Internet"
       },
       {
-        "tag": "dns-direct",
-        "address": "8.8.4.4",
-        "address_resolver": "dns-local",
+        "tag": "Best Latency-dns",
+        "address": "fakeip",
+        "strategy": "prefer_ipv4",
+        "detour": "Best Latency"
+      },
+      {
+        "tag": "direct-dns",
+        "address": "tcp://8.8.8.8",
+        "strategy": "prefer_ipv4",
         "detour": "direct"
       },
       {
-        "tag": "dns-local",
-        "address": "local",
-        "detour": "direct"
-      },
-      {
-        "tag": "dns-block",
+        "tag": "block-dns",
         "address": "rcode://success"
       }
     ],
     "rules": [
       {
-        "domain": "2tnc6zpc9c.cloudflare-gateway.com",
-        "server": "dns-direct"
+        "domain_suffix": "all-v4.dgi000.store",
+        "server": "direct-dns",
+        "rewrite_ttl": 20
       },
       {
-        "geosite": "category-ads-all",
-        "server": "dns-block",
-        "disable_cache": true
+        "domain": "www.gstatic.com",
+        "server": "Internet-dns",
+        "rewrite_ttl": 3000
+      },
+      {
+        "network": "udp",
+        "port": 443,
+        "server": "block-dns",
+        "rewrite_ttl": 20
+      },
+      {
+        "domain_regex": [
+          ".*\\.ir$",
+          ".*\\.xn--mgba3a4f16a$"
+        ],
+        "server": "direct-dns",
+        "rewrite_ttl": 20
+      },
+      {
+        "outbound": "Internet",
+        "server": "Internet-dns",
+        "rewrite_ttl": 20
+      },
+      {
+        "outbound": "Best Latency",
+        "server": "Best Latency-dns",
+        "rewrite_ttl": 20
+      },
+      {
+        "outbound": "direct",
+        "server": "direct-dns",
+        "rewrite_ttl": 20
+      },
+      {
+        "outbound": "any",
+        "server": "direct-dns",
+        "rewrite_ttl": 20
       }
     ],
+    "final": "Internet-dns",
     "fakeip": {
       "enabled": true,
-      "inet4_range": "198.18.0.0/15",
-      "inet6_range": "fc00::/18"
+      "inet4_range": "198.18.0.0/15"
     },
-    "independent_cache": true
+    "strategy": "prefer_ipv4",
+    "disable_expire": true
   },
   "inbounds": [
-    {
-      "type": "direct",
-      "tag": "dns-in",
-      "listen": "0.0.0.0",
-      "listen_port": 16450,
-      "override_address": "8.8.8.8",
-      "override_port": 53
-    },
     {
       "type": "tun",
       "tag": "tun-in",
@@ -62,39 +90,86 @@
       "mtu": 9000,
       "auto_route": true,
       "strict_route": true,
-      "endpoint_independent_nat": true,
-      "stack": "system",
+      "stack": "mixed",
       "sniff": true,
+      "sniff_override_destination": true,
+      "domain_strategy": "prefer_ipv4",
       "inet4_address": "172.19.0.1/30"
     },
     {
       "type": "mixed",
       "tag": "mixed-in",
       "listen": "0.0.0.0",
-      "listen_port": 2080,
-      "sniff": true
+      "listen_port": 4040,
+      "sniff": true,
+      "sniff_override_destination": true,
+      "domain_strategy": "prefer_ipv4"
+    },
+    {
+      "type": "direct",
+      "tag": "dns-in",
+      "listen": "0.0.0.0",
+      "listen_port": 4050,
+      "sniff": true,
+      "sniff_override_destination": true,
+      "domain_strategy": "prefer_ipv4",
+      "override_address": "8.8.8.8",
+      "override_port": 53
     }
   ],
   "outbounds": [
     {
+      "type": "selector",
+      "tag": "Internet",
+      "outbounds": [
+        "Best Latency",
+        "🇨🇭 Azadi"
+      ],
+      "default": "Best Latency"
+    },
+    {
+      "type": "urltest",
+      "tag": "Best Latency",
+      "outbounds": [
+        "🇨🇭 Azadi"
+      ],
+      "url": "http://www.gstatic.com/generate_204",
+      "interval": "3m0s",
+      "tolerance": 1,
+      "idle_timeout": "9m0s"
+    },
+    {
       "type": "hysteria2",
-      "tag": "🇵🇱H2",
-      "server": "31.186.87.205",
-      "server_port": 19468,
-      "password": "bc97f674-c578-4940-9234-0a1da46041b9",
+      "tag": "🇨🇭 Azadi",
+      "domain_strategy": "prefer_ipv4",
+      "server": "all-v4.dgi000.store",
+      "server_port": 443,
+      "obfs": {
+        "type": "salamander",
+        "password": "@azadi_az_inja_migzare"
+      },
+      "password": "@azadi_az_inja_migzare",
       "tls": {
         "enabled": true,
-        "server_name": "www.bing.com",
-        "insecure": true
+        "server_name": "all-v4.dgi000.store",
+        "alpn": "h3",
+        "min_version": "1.3",
+        "max_version": "1.3",
+        "ech": {
+          "enabled": true,
+          "pq_signature_schemes_enabled": true,
+          "config": [
+            "-----BEGIN ECH CONFIGS-----",
+            "AEb+DQBCAAAgACAzj8BolIG68jc1kgCeQ2Fg2cDQcw5KvTycY6MwW6kMdAAIAAEA",
+            "AQABAAMAD0E0LmRnaTAwMC5zdG9yZQAA",
+            "-----END ECH CONFIGS-----"
+          ]
+        }
       }
     },
     {
       "type": "direct",
       "tag": "direct"
-    },
-    {
-      "type": "direct",
-      "tag": "bypass"
     },
     {
       "type": "block",
@@ -108,11 +183,11 @@
   "route": {
     "rules": [
       {
-        "port": 53,
+        "inbound": "dns-in",
         "outbound": "dns-out"
       },
       {
-        "inbound": "dns-in",
+        "port": 53,
         "outbound": "dns-out"
       },
       {
@@ -121,37 +196,33 @@
         "outbound": "block"
       },
       {
-        "geosite": "category-ads-all",
+        "protocol": "stun",
         "outbound": "block"
       },
       {
-        "geosite": "all",
-        "outbound": "bypass"
+        "ip_is_private": true,
+        "outbound": "direct"
       },
       {
-        "geoip": "ir",
-        "outbound": "bypass"
-      },
-      {
-        "geosite": "ads",
-        "outbound": "block"
-      },
-      {
-        "geoip": "private",
-        "outbound": "bypass"
-      },
-      {
-        "source_ip_cidr": [
-          "224.0.0.0/3",
-          "ff00::/8"
+        "domain_regex": [
+          ".*\\.i﻿r$",
+          ".*\\.xn--mgba3a4f16a$"
         ],
-        "ip_cidr": [
-          "224.0.0.0/3",
-          "ff00::/8"
-        ],
-        "outbound": "block"
+        "outbound": "direct"
       }
     ],
-    "auto_detect_interface": true
+    "final": "Internet",
+    "auto_detect_interface": true,
+    "override_android_vpn": true
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "path": "cache.db",
+      "cache_id": "saeed",
+      "store_fakeip": true,
+      "store_rdrc": true,
+      "rdrc_timeout": "168h0m0s"
+    }
   }
 }
