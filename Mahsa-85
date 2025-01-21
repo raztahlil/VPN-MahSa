@@ -1,7 +1,4 @@
 {
-  "dns": {
-    "final": "local-dns",
-    "rules": [
       {
         "clash_mode": "Global",
         "server": "proxy-dns",
